@@ -1,5 +1,5 @@
 {
-    "baseUrl": "https://cms-lyart.vercel.app/",
     "chromeWebSecurity": false,
     "experimentalSessionSupport": true
+    
 }
