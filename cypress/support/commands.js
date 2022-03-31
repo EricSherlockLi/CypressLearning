@@ -23,16 +23,31 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+import 'cypress-file-upload';
 
-Cypress.Commands.add('login', (username, password) =>{
-    cy.clearCookies()
-    cy.clearLocalStorage()
-    cy.session([username, password], () =>{
-        cy.visit ("/login")
-        cy.get('[value="manager"]').click({force: true})
-        cy.get('[type="email"]').type(username)
-        cy.get('[type="password"]').type(password)
-        cy.get('[type="submit"]').click()
-        // cy.url().should('eql', '/dashboard/manager')
-    })
+Cypress.Commands.add('loginByUI', (username, password) =>{
+    cy.visit('https://cms-lyart.vercel.app/login')
+    cy.get('[value="manager"]').check({force: true})
+    cy.get('#login_email').type(username)
+    cy.get('#login_password').type(password)
+    cy.get('[type="submit"]').click()
+    cy.url().should('contain', '/dashboard/manager')
+})
+
+Cypress.Commands.add('loginByAPI', (username, password) =>{
+    cy.request({
+            method: 'POST',
+            url: 'http://cms.chtoma.com/api/login',
+            body: {
+                "email": "manager@admin.com",
+                "password": "U2FsdGVkX1/h+eU4JJ4D2rpaGaiYpHetC/bZzTM0518=",
+                "remember": true,
+                "role": "manager"
+            },
+        }).then((res)=> {
+            // 写成2xx正则表达式
+            expect(res.status).to.eq(201)
+            Cypress.env('cms', res.body.data.token)
+        })
+
 })
